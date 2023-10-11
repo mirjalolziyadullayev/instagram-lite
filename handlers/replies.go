@@ -6,6 +6,7 @@ import (
 	"instagram/models"
 	"net/http"
 	"os"
+	"time"
 )
 
 func RepliesHandler(w http.ResponseWriter, r *http.Request) {
@@ -44,14 +45,15 @@ func createReply(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(byteData, &repliesData)
 
 	for i := 0; i < len(repliesData); i++ {
-		if repliesData[i].CommentId == newReply.CommentId {
-			//adding changes to variable gotten from json file
-			repliesData = append(repliesData, newReply)
-		} else {
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(w, "no comment found with such kind of id")
+		if repliesData[i].Id == newReply.Id {	
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "comment with such kind of ID is already exist")	
+			return
 		}
 	}
+	newReply.CreatedAt = time.Now()
+	newReply.UpdatedAt = time.Now()
+	repliesData = append(repliesData, newReply)
 	//array variable to json db file
 	res, _ := json.Marshal(repliesData)
 	os.WriteFile("db/replies.json",res,0)
@@ -59,7 +61,6 @@ func createReply(w http.ResponseWriter, r *http.Request) {
 	//sendiing response
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprint(w, "Created Successfully")
-	json.NewEncoder(w).Encode(newReply)
 }
 
 func updateReply(w http.ResponseWriter, r *http.Request) {
@@ -109,5 +110,4 @@ func deleteReply(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusAccepted)
 	fmt.Fprint(w, "Deleted Successfully")
-
 }

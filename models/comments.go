@@ -4,8 +4,8 @@ import "time"
 
 type Comments struct {
 	Id        int
-	UserId    User
-	PostId    Posts
+	UserId    int
+	PostId    int
 	Text      string
 	CreatedAt time.Time
 }

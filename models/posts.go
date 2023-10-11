@@ -4,7 +4,7 @@ import "time"
 
 type Posts struct {
 	Id        int
-	UserId    User
+	UserId    int
 	Title     string
 	Content   string
 	LikesCount int
