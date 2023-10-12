@@ -30,8 +30,73 @@ func getAllReplies(w http.ResponseWriter, r *http.Request) {
 	// converting json to variable []models.Replies
 	json.Unmarshal(byteData, &repliesData)
 
+	template := `
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>doc</title>
+		<style>
+		body {
+			margin: 0;
+			padding: 0;
+			background-color: whitesmoke;
+		}
+		.container {
+			text-align: center;
+			margin: 0px;
+			padding: 10px;
+		}
+		.list {
+			text-align: left;
+			max-width: 400px;
+			border: 1px solid grey;
+			border-radius: 4px;
+			margin: 20px;
+			padding: 10px;
+			background-color: lightblue;
+			font-family: sans-serif;
+		}
+		.list h1,h2,h3,h4,h5,h6 {
+			margin-right: 5px;
+			color: grey;
+			margin: 10px;
+			padding: 4px;
+			border: 1px solid grey;
+			border-radius: 4px;
+		}
+		.list i {
+			color: black;
+			font-family: calibri;
+			font-size: 16px;
+		}
+		</style>
+	</head>
+	<body>
+	<div class='container'>
+	<a href='/'><button>Home</button></a>
+	<h3>Replies list</h3>` 
+	for i := 0; i < len(repliesData); i++ {
+		div := "<div class='list'>"
+		Id := "<h4>Reply ID:<i>" + fmt.Sprint(repliesData[i].Id) + "</i></h4>"
+		userID := "<h4>User ID:<i>" + fmt.Sprint(repliesData[i].UserId) + "</i></h4>"
+		postID := "<h4>Post ID:<i>" + fmt.Sprint(repliesData[i].PostId) + "</i></h4>"
+		commentID := "<h4>Comment ID:<i>" + fmt.Sprint(repliesData[i].CommentId) + "</i></h4>"
+		text := "<h4>Text:<i>" + repliesData[i].Text + "</i></h4>"
+		CreatedAt := "<h4>Created at:<i>" + repliesData[i].CreatedAt + "</i></h4>"
+		UpdatedAt := "<h4>Updated at:<i>" + repliesData[i].UpdatedAt + "</i></h4>"
+		div += Id + userID + postID + commentID + text + CreatedAt + UpdatedAt
+		div += "</div>"
+		template += div
+	}
+	template +=  `
+	</div>
+	</body>
+	</html>
+	`
 	//sending taken result to client
-	json.NewEncoder(w).Encode(repliesData)
+	fmt.Fprint(w, template)
 }
 
 func createReply(w http.ResponseWriter, r *http.Request) {
@@ -45,14 +110,14 @@ func createReply(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(byteData, &repliesData)
 
 	for i := 0; i < len(repliesData); i++ {
-		if repliesData[i].Id == newReply.Id {	
+		if repliesData[i].Id == newReply.Id && repliesData[i].CommentId == newReply.CommentId {	
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprint(w, "comment with such kind of ID is already exist")	
 			return
 		}
 	}
-	newReply.CreatedAt = time.Now()
-	newReply.UpdatedAt = time.Now()
+	newReply.CreatedAt = time.Now().Format(time.RFC1123)
+	newReply.UpdatedAt = time.Now().Format(time.RFC1123)
 	repliesData = append(repliesData, newReply)
 	//array variable to json db file
 	res, _ := json.Marshal(repliesData)
@@ -74,7 +139,8 @@ func updateReply(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(byteData, &repliesData)
 
 	for i := 0; i < len(repliesData); i++ {
-		if repliesData[i].Id == newReply.Id {
+		if repliesData[i].Id == newReply.Id && repliesData[i].CommentId == newReply.CommentId {
+			newReply.UpdatedAt = time.Now().Format(time.RFC1123)
 			repliesData[i].UpdatedAt = newReply.UpdatedAt
 			repliesData[i].Text = newReply.Text
 		}
@@ -104,7 +170,7 @@ func deleteReply(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "no reply with such kind of ID")
 		}
 	}
-
+	
 	res,_ := json.Marshal(repliesData)
 	os.WriteFile("db/replies.json", res, 0)
 

@@ -2,7 +2,7 @@
     {
         "Id": 1,
         "Username": "a",
-        "Email": "",
+        "Email": "gmail.com",
         "Age": 0,
         "CreatedAt": "Tue, 10 Oct 2023 22:50:14 +05",
         "UpdatedAt": "Tue, 10 Oct 2023 22:50:14 +05"

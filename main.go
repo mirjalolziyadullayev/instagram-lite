@@ -15,6 +15,6 @@ func main() {
 	http.HandleFunc("/comments", handlers.CommentsHanlder)
 	http.HandleFunc("/replies", handlers.RepliesHandler)
 
-	fmt.Println("Starting server on port 8080")
-	http.ListenAndServe(":8080", nil)
+	fmt.Println("Server working on port :1000")
+	http.ListenAndServe(":1000", nil)
 }
